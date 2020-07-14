@@ -15,6 +15,7 @@ SECTIONS
 
 	. = ALIGN(4);
 	.vectors : {
+		_text_start = .;
 		KEEP(*(.vectors))
 	} >flash
 
@@ -28,6 +29,8 @@ SECTIONS
 	. = ALIGN(4);
 	.rodata : {
 		*(.rodata*)
+		. = ALIGN(4);
+		_text_end = .;
 	} >flash
 
 	. = ALIGN(4);

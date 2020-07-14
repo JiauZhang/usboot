@@ -9,10 +9,12 @@
 
 .global _reset
 .global _vectors
+.global _text_start
+.global _text_end
 .global _data_start
 .global _data_end
-.global _bss_start
-.global _bss_end
+.global _bstart
+.global _bend
 
 .section .vectors, "ax"
 
@@ -85,6 +87,18 @@ _vectors:
 .section .text._reset, "ax"
 
 _reset:
+	@ clear bss
+	mov r2, #0x00000000
+	/*
+	 * invalid usage
+	 * ldr r0, _bstart
+	 * ldr r1, _bend
+	 */
+	ldr r0, =_bstart
+	ldr r1, =_bend
+	str r2, [r0]
+	cmp r0, r1
+	blo _reset
 	b main
 	@ never be here!
 	b _reset
@@ -196,7 +210,15 @@ _loop:
 .thumb_set _usb_wakeup, _loop
 
 .section .data.start
-.word _data_start
-.word _data_end
-.word _bss_start
-.word _bss_end
+_tstart:
+	.word _text_start
+_tend:
+	.word _text_end
+_dstart:
+	.word _data_start
+_dend:
+	.word _data_end
+_bstart:
+	.word _bss_start
+_bend:
+	.word _bss_end

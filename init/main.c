@@ -2,12 +2,22 @@
  * usboot/init/main.c
  */
 
-int data_test;
+// #include <main.h>
+
+int bss_test;
+extern unsigned int _bss_start;
+
+void _flash()
+{
+	int i;
+	for (i=0; i<10; i++);
+}
 
 int main(void)
 {
-	for (int i=0; i<10; i++)
-		;
+	// clock_init();
+	// ram_init();
+	bss_test = _bss_start;
 
 	return 0;
 }
