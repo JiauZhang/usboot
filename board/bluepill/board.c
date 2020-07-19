@@ -1,5 +1,4 @@
-#ifndef __MAIN_H__
-#define __MAIN_H__
+#include <common.h>
 
 void clock_init()
 {
@@ -12,5 +11,3 @@ void ram_init()
 	int i;
 	for (i=0; i<10; i++);
 }
-
-#endif

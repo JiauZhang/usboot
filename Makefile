@@ -1,7 +1,41 @@
-src-y = cpu/stm32f103/start.S init/main.c
-obj-y = cpu/stm32f103/start.o init/main.o
-LDSCRIPT = cpu/stm32f103/usboot.lds
-CFLAGS = -c -I$(CURDIR)/include
+# Do not use make's built-in rules and variables
+# Do not print "Entering directory ..."
+MAKEFLAGS += -rR --no-print-directory
+
+# Use 'make V=1' to see the full commands
+ifeq ("$(origin V)", "command line")
+	BUILD_VERBOSE = $(V)
+endif
+ifndef BUILD_VERBOSE
+	BUILD_VERBOSE = 0
+endif
+
+ifeq ($(BUILD_VERBOSE),1)
+	quiet = 
+	Q = 
+else
+	quiet = quiet_
+	Q = @
+endif
+
+export quiet Q BUILD_VERBOSE
+
+srctree := $(CURDIR)
+objtree := $(CURDIR)
+src := $(srctree)
+obj := $(objtree)
+
+export srctree objtree
+
+src-y = $(srctree)/cpu/stm32f103/start.S init/main.c
+src-y += $(srctree)/board/bluepill/board.c
+
+obj-y = $(srctree)/cpu/stm32f103/start.o init/main.o
+obj-y += $(srctree)/board/bluepill/board.o
+
+LDSCRIPT = $(srctree)/cpu/stm32f103/usboot.lds
+CFLAGS = -c -I$(srctree)/include
+LDFLAGS = -O binary -S
 
 CROSS_COMPILE = arm-none-eabi-
 CC = $(CROSS_COMPILE)gcc
@@ -10,26 +44,30 @@ OBJCOPY = $(CROSS_COMPILE)objcopy
 OBJDUMP = $(CROSS_COMPILE)objdump
 
 usboot.bin: usboot.elf
-	@echo "OBJCOPY   $@"
-	@$(OBJCOPY) -O binary -S $^ $@
+	$(Q)echo "OBJCOPY   $@"
+	$(Q)$(OBJCOPY) $(LDFLAGS) $^ $@
 
 usboot.dis: usboot.elf
-	@echo "OBJDUMP   $@"
-	@$(OBJDUMP) -D -m arm $< > $@
+	$(Q)echo "OBJDUMP   $@"
+	$(Q)$(OBJDUMP) -D -m arm $< > $@
 
 
 usboot.elf: $(obj-y)
-	@echo "LD        $@"
-	@$(LD) $(obj-y) -T $(LDSCRIPT) -o $@ 
+	$(Q)echo "LD        $@"
+	$(Q)$(LD) $(obj-y) -T $(LDSCRIPT) -o $@ 
 
 %.o: %.c
-	@echo "CC        $@"
-	@$(CC) $(CFLAGS) $< -o $@
+	$(Q)echo "CC        $@"
+	$(Q)$(CC) $(CFLAGS) $< -o $@
 
 %.o: %.S
-	@echo "CC        $@"
-	@$(CC) $(CFLAGS) $< -o $@
+	$(Q)echo "CC        $@"
+	$(Q)$(CC) $(CFLAGS) $< -o $@
+
+%.o: %.s
+	$(Q)echo "CC        $@"
+	$(Q)$(CC) $(CFLAGS) $< -o $@
 
 clean:
-	@rm -f usboot.*
-	@rm -f $(obj-y)
+	$(Q)rm -f usboot.*
+	$(Q)rm -f $(obj-y)
