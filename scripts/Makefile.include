@@ -1,0 +1,3 @@
+# generic build definitions
+
+build := -f scripts/Makefile.build obj

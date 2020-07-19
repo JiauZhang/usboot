@@ -27,34 +27,57 @@ obj := $(objtree)
 
 export srctree objtree
 
-src-y = $(srctree)/cpu/stm32f103/start.S init/main.c
-src-y += $(srctree)/board/bluepill/board.c
+# Look for make include files relative to root of usboot src
+MAKEFLAGS += --include-dir=$(srctree)
 
-obj-y = $(srctree)/cpu/stm32f103/start.o init/main.o
-obj-y += $(srctree)/board/bluepill/board.o
+# src-y = $(srctree)/cpu/stm32f103/start.S init/main.c
+# src-y += $(srctree)/board/bluepill/board.c
+src-y :=
 
-LDSCRIPT = $(srctree)/cpu/stm32f103/usboot.lds
-CFLAGS = -c -I$(srctree)/include
-LDFLAGS = -O binary -S
+# obj-y = $(srctree)/cpu/stm32f103/start.o init/main.o
+# obj-y += $(srctree)/board/bluepill/board.o
 
+CPU = stm32f103
+BOARD = bluepill
 CROSS_COMPILE = arm-none-eabi-
+
+export CPU bluepill
+
 CC = $(CROSS_COMPILE)gcc
 LD = $(CROSS_COMPILE)ld
 OBJCOPY = $(CROSS_COMPILE)objcopy
 OBJDUMP = $(CROSS_COMPILE)objdump
 
+export CC LD OBJCOPY OBJDUMP
+
+LDSCRIPT = $(srctree)/cpu/$(CPU)/usboot.lds
+CFLAGS = -c -I$(srctree)/include
+OBJCOPYFLAGS = -O binary -R .comment -S
+
+# Some generic definitions
+include $(srctree)/scripts/Makefile.include
+
+# CPU specific files
+include $(srctree)/cpu/Makefile
+include $(srctree)/init/Makefile
+include $(srctree)/board/Makefile
+
+# obj-y
+obj-y := $(patsubst %.c,%.o,$(src-y))
+obj-y := $(patsubst %.S,%.o,$(obj-y))
+obj-y := $(patsubst $.s,%.o,$(obj-y))
+
 usboot.bin: usboot.elf
 	$(Q)echo "OBJCOPY   $@"
-	$(Q)$(OBJCOPY) $(LDFLAGS) $^ $@
+	$(Q)$(OBJCOPY) $(OBJCOPYFLAGS) $^ $@
 
 usboot.dis: usboot.elf
 	$(Q)echo "OBJDUMP   $@"
 	$(Q)$(OBJDUMP) -D -m arm $< > $@
 
-
 usboot.elf: $(obj-y)
 	$(Q)echo "LD        $@"
-	$(Q)$(LD) $(obj-y) -T $(LDSCRIPT) -o $@ 
+	$(Q)$(LD) $(obj-y) -T $(LDSCRIPT)  -o $@ 
 
 %.o: %.c
 	$(Q)echo "CC        $@"
