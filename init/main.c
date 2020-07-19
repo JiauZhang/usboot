@@ -2,10 +2,13 @@
  * usboot/init/main.c
  */
 
-// #include <main.h>
+#include <main.h>
 
 int bss_test;
 extern unsigned int _bss_start;
+// extern void clock_init();
+// extern void ram_init();
+
 
 void _flash_irq()
 {
@@ -15,8 +18,8 @@ void _flash_irq()
 
 int main(void)
 {
-	// clock_init();
-	// ram_init();
+	clock_init();
+	ram_init();
 	bss_test = _bss_start;
 
 	return 0;
