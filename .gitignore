@@ -19,6 +19,7 @@
 
 # Libraries
 *.lib
+!scripts/Makefile.lib
 *.a
 *.la
 *.lo
