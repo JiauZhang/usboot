@@ -1,0 +1,24 @@
+lib-y := $(filter-out $(obj-y),$(lib-y))
+
+# Handle objects in subdirs
+__subdir-y := $(patsubst %/,%,$(filter %/,$(obj-y)))
+subdir-y += $(__subdir-y)
+obj-y := $(patsubst %/,%/built-in.o,$(obj-y)
+
+# if $(foo-objs) exists, foo.o is a composite object
+multi-used := $(sort $(foreach y,$(obj-y),$(if $(strip $($(y:.o=-objs)) $($(y:.o=-y))),$(y))))
+
+# Composite objects depends on $(multi-objs)
+multi-objs := $(foreach y,$(multi-used),$($(y:.o=-objs)) $($(y:.o=-y)))
+
+# Subdir's built-in.o
+subdir-obj-y := $(filter %/built-in.o,$(obj-y))
+
+# $(obj-dirs) is a list of directories that contain built-in.o object files
+obj-dirs := $(dir $(subdir-obj-y))
+
+# Filter local dir objects only
+real-objs-y := $(foreach y,$(filter-out $(subdir-obj-y),$(obj-y)),$(if $(strip $($(y:.o=-objs)) $($(y:.o=-y))),$($(m:.o=-objs)) $($(y:.o=-y)),$(y))) $(extra-y)
+
+# Add subdir path
+

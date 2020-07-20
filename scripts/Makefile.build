@@ -1,0 +1,31 @@
+# Build system
+
+src := $(obj)
+
+# That's the default target
+PHONY := __build
+__build:
+
+# Init all relevant variables used in build system
+obj-y :=
+lib-y :=
+always :=
+targets :=
+subdir-y :=
+EXTRA_AFLAGS :=
+EXTRA_CFLAGS :=
+EXTRA_CPPFLAGS :=
+EXTRA_LDFLAGS :=
+
+# Read auto.conf if it exists, otherwise ignore
+-include include/config/auto.conf
+
+# Include useful generic definitions
+include scripts/Makefile.include
+
+# Include target dir's Makefile
+target-dir := $(if $(filter /%,$(src)),$(src),$(srctree)/$(src))
+target-file := $(target-dir)/Makefile
+include $(target-file)
+
+include scripts/Makefile.lib
