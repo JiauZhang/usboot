@@ -29,3 +29,23 @@ target-file := $(target-dir)/Makefile
 include $(target-file)
 
 include scripts/Makefile.lib
+
+ifneq ($(hostprogs-y),)
+include scripts/Makefile.host
+endif
+
+ifndef obj
+$(warning build: Makefile.build is included improperly)
+endif
+
+ifneq ($(strip $(lib-y)),)
+lib-target := $(obj)/lib.a
+endif
+
+ifneq ($(strip $(obj-y) $(lib-target)),)
+builtin-target := $(obj)/built-in.o
+endif
+
+__build: $(builtin-target) $(lib-target) $(extra-y) $(subdir-y) $(always)
+	@:
+

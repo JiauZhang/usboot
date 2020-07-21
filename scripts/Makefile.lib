@@ -18,7 +18,17 @@ subdir-obj-y := $(filter %/built-in.o,$(obj-y))
 obj-dirs := $(dir $(subdir-obj-y))
 
 # Filter local dir objects only
-real-objs-y := $(foreach y,$(filter-out $(subdir-obj-y),$(obj-y)),$(if $(strip $($(y:.o=-objs)) $($(y:.o=-y))),$($(m:.o=-objs)) $($(y:.o=-y)),$(y))) $(extra-y)
+real-objs-y := $(foreach y,$(filter-out $(subdir-obj-y),$(obj-y)),\
+		$(if $(strip $($(y:.o=-objs)) $($(y:.o=-y))),$($(y:.o=-objs)) $($(y:.o=-y)),$(y))) $(extra-y)
 
 # Add subdir path
+extra-y := $(addprefix $(obj)/,$(extra-y))
+always := $(addprefix $(obj)/,$(always))
+obj-y := $(addprefix $(obj)/,$(obj-y))
+lib-y := $(addprefix $(obj)/,$(lib-y))
+subdir-obj-y := $(addprefix $(obj)/,$(subdir-obj-y))
+real-objs-y := $(addprefix $(obj)/,$(real-objs-y))
+multi-used := $(addprefix $(obj)/,$(multi-used))
+multi-objs := $(addprefix $(obj)/,$(multi-objs))
+obj-dirs := $(addprefix $(obj)/,$(obj-dirs))
 

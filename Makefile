@@ -10,6 +10,10 @@ ifndef BUILD_VERBOSE
 	BUILD_VERBOSE = 0
 endif
 
+# That's our default target when none is given on the command line
+PHONY := all
+all:
+
 ifeq ($(BUILD_VERBOSE),1)
 	quiet = 
 	Q = 
@@ -77,7 +81,7 @@ usboot.dis: usboot.elf
 
 usboot.elf: $(obj-y)
 	$(Q)echo "LD        $@"
-	$(Q)$(LD) $(obj-y) -T $(LDSCRIPT)  -o $@ 
+	$(Q)$(LD) $(obj-y) -T $(LDSCRIPT)  -o $@
 
 %.o: %.c
 	$(Q)echo "CC        $@"
