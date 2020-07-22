@@ -12,14 +12,14 @@ endif
 
 # That's our default target when none is given on the command line
 PHONY := all
-all:
+all: usboot
 
 ifeq ($(BUILD_VERBOSE),1)
-	quiet = 
-	Q = 
+  quiet = 
+  Q = 
 else
-	quiet = quiet_
-	Q = @
+  quiet = quiet_
+  Q = @
 endif
 
 export quiet Q BUILD_VERBOSE
@@ -60,6 +60,24 @@ OBJCOPYFLAGS = -O binary -R .comment -S
 
 # Some generic definitions
 include $(srctree)/scripts/Makefile.include
+
+# include user's configuration if it exists
+-include include/config/auto.conf
+
+# include cpu specific dir
+include cpu/$(CPU)/Makefile
+
+init-y := init/
+core-y := board/
+libs-y := lib/
+
+usboot-init := $(head-y) $(init-y)
+usboot-main := $(core-y) $(libs-y)
+usboot-all := $(usboot-init) $(usboot-main)
+usboot-lds := cpu/$(CPU)/usboot.lds
+
+usboot: $(usboot-lds) $(usboot-init) $(usboot-main)
+	$(Q)echo "usboot default target"
 
 # CPU specific files
 include $(srctree)/cpu/Makefile
