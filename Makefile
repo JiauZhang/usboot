@@ -71,6 +71,12 @@ init-y := init/
 core-y := board/
 libs-y := lib/
 
+usboot-dirs	:= $(patsubst %/,%,$(filter %/, $(init-y) $(core-y) $(libs-y)))
+
+init-y := $(patsubst %/, %/built-in.o, $(init-y))
+core-y := $(patsubst %/, %/built-in.o, $(core-y))
+libs-y := $(patsubst %/, %/built-in.o, $(libs-y))
+
 usboot-init := $(head-y) $(init-y)
 usboot-main := $(core-y) $(libs-y)
 usboot-all := $(usboot-init) $(usboot-main)
@@ -78,6 +84,10 @@ usboot-lds := cpu/$(CPU)/usboot.lds
 
 usboot: $(usboot-lds) $(usboot-init) $(usboot-main)
 	$(Q)echo "usboot default target"
+
+PHONY += $(usboot-dirs)
+$(usboot-dirs):
+	$(Q)$(MAKE) $(build)=$@
 
 # CPU specific files
 include $(srctree)/cpu/Makefile
