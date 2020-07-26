@@ -3,7 +3,7 @@ lib-y := $(filter-out $(obj-y),$(lib-y))
 # Handle objects in subdirs
 __subdir-y := $(patsubst %/,%,$(filter %/,$(obj-y)))
 subdir-y += $(__subdir-y)
-obj-y := $(patsubst %/,%/built-in.o,$(obj-y)
+obj-y := $(patsubst %/,%/built-in.o,$(obj-y))
 
 # if $(foo-objs) exists, foo.o is a composite object
 multi-used := $(sort $(foreach y,$(obj-y),$(if $(strip $($(y:.o=-objs)) $($(y:.o=-y))),$(y))))

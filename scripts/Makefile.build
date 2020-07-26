@@ -38,14 +38,19 @@ ifndef obj
 $(warning build: Makefile.build is included improperly)
 endif
 
-ifneq ($(strip $(lib-y)),)
+ifneq ($(strip $(lib-y) $(lib-)),)
 lib-target := $(obj)/lib.a
 endif
 
-ifneq ($(strip $(obj-y) $(lib-target)),)
+ifneq ($(strip $(obj-y) $(obj-) $(lib-target)),)
 builtin-target := $(obj)/built-in.o
 endif
 
 __build: $(builtin-target) $(lib-target) $(extra-y) $(subdir-y) $(always)
 	@:
 
+$(builtin-target): $(obj-y)
+	@echo 'obj-y: '$(obj-y)
+
+$(lib-target): $(lib-y)
+	@echo 'lib-y: '$(lib-y)

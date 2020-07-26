@@ -1,1 +1,1 @@
-src-y += board/bluepill/board.c
+obj-y += board.c

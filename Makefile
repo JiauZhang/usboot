@@ -1,3 +1,8 @@
+VERSION = 0
+PATCHLEVEL = 0
+SUBLEVEL = 1
+EXTRAVERSION =
+
 # Do not use make's built-in rules and variables
 # Do not print "Entering directory ..."
 MAKEFLAGS += -rR --no-print-directory
@@ -45,7 +50,7 @@ CPU = stm32f103
 BOARD = bluepill
 CROSS_COMPILE = arm-none-eabi-
 
-export CPU bluepill
+export CPU BOARD
 
 CC = $(CROSS_COMPILE)gcc
 LD = $(CROSS_COMPILE)ld
@@ -84,20 +89,27 @@ usboot-lds := cpu/$(CPU)/usboot.lds
 
 usboot: $(usboot-lds) $(usboot-init) $(usboot-main)
 	$(Q)echo "usboot default target"
+	$(Q)echo $(usboot-lds)
+	$(Q)echo $(usboot-init)
+	$(Q)echo $(usboot-main)
+
+# The actual objects are generated when descending, 
+# make sure no implicit rule kicks in
+$(sort $(usboot-init) $(usboot-main)) $(usboot-lds): $(usboot-dirs) ;
 
 PHONY += $(usboot-dirs)
 $(usboot-dirs):
 	$(Q)$(MAKE) $(build)=$@
 
 # CPU specific files
-include $(srctree)/cpu/Makefile
-include $(srctree)/init/Makefile
-include $(srctree)/board/Makefile
+# include $(srctree)/cpu/Makefile
+# include $(srctree)/init/Makefile
+# include $(srctree)/board/Makefile
 
 # obj-y
-obj-y := $(patsubst %.c,%.o,$(src-y))
-obj-y := $(patsubst %.S,%.o,$(obj-y))
-obj-y := $(patsubst $.s,%.o,$(obj-y))
+# obj-y := $(patsubst %.c,%.o,$(src-y))
+# obj-y := $(patsubst %.S,%.o,$(obj-y))
+# obj-y := $(patsubst $.s,%.o,$(obj-y))
 
 usboot.bin: usboot.elf
 	$(Q)echo "OBJCOPY   $@"
@@ -126,3 +138,8 @@ usboot.elf: $(obj-y)
 clean:
 	$(Q)rm -f usboot.*
 	$(Q)rm -f $(obj-y)
+
+PHONY += FORCE
+FORCE:
+
+.PHONY: $(PHONY)

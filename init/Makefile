@@ -1,1 +1,1 @@
-src-y += init/main.c
+obj-y += main.c
