@@ -54,3 +54,8 @@ $(builtin-target): $(obj-y)
 
 $(lib-target): $(lib-y)
 	@echo 'lib-y: '$(lib-y)
+
+# Descending into subdirectories
+PHONY += $(subdir-y)
+$(subdir-y):
+	$(Q)$(MAKE) $(build)=$@
