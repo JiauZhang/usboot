@@ -49,8 +49,18 @@ endif
 __build: $(builtin-target) $(lib-target) $(extra-y) $(subdir-y) $(always)
 	@:
 
+# Rule to compile a set of .o files into one .o file
+ifdef builtin-target
+
+quiet_cmd_link_o_target = AR      $@
+
 $(builtin-target): $(obj-y)
-	@echo 'obj-y: '$(obj-y)
+	@echo obj-y: $(obj-y)
+	$(Q)echo $(quiet_cmd_link_o_target)
+# $(Q)$(AR) rcs $@ $^
+	$(Q)$(LD) -r -o $@ $^
+
+endif # builtin-target
 
 $(lib-target): $(lib-y)
 	@echo 'lib-y: '$(lib-y)
@@ -59,3 +69,20 @@ $(lib-target): $(lib-y)
 PHONY += $(subdir-y)
 $(subdir-y):
 	$(Q)$(MAKE) $(build)=$@
+
+$(obj)/%.o: $(obj)/%.c
+	$(Q)echo "CC        $@"
+	$(Q)$(CC) $(CFLAGS) $< -o $@
+
+$(obj)/%.o: $(obj)/%.S
+	$(Q)echo "CC        $@"
+	$(Q)$(CC) $(CFLAGS) $< -o $@
+
+$(obj)/%.o: $(obj)/%.s
+	$(Q)echo "CC        $@"
+	$(Q)$(CC) $(CFLAGS) $< -o $@
+
+PHONY += FORCE
+FORCE:
+
+.PHONY: $(PHONY)

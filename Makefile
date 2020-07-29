@@ -54,14 +54,17 @@ export CPU BOARD
 
 CC = $(CROSS_COMPILE)gcc
 LD = $(CROSS_COMPILE)ld
+AR = $(CROSS_COMPILE)ar
 OBJCOPY = $(CROSS_COMPILE)objcopy
 OBJDUMP = $(CROSS_COMPILE)objdump
 
-export CC LD OBJCOPY OBJDUMP
+export CC LD AR OBJCOPY OBJDUMP
 
 LDSCRIPT = $(srctree)/cpu/$(CPU)/usboot.lds
-CFLAGS = -c -I$(srctree)/include
+CFLAGS = -c -I$(srctree)/include -I$(srctree)/cpu/$(CPU)/include
 OBJCOPYFLAGS = -O binary -R .comment -S
+
+export CFLAGS OBJCOPYFLAGS
 
 # Some generic definitions
 include $(srctree)/scripts/Makefile.include
@@ -89,6 +92,8 @@ usboot-lds := cpu/$(CPU)/usboot.lds
 
 usboot: $(usboot-lds) $(usboot-init) $(usboot-main)
 	$(Q)echo "usboot default target"
+	$(Q)$(LD) -o $@ $^ -T $(LDSCRIPT)
+# $(Q)$(LD) -r -o $@ $^
 	$(Q)echo $(usboot-lds)
 	$(Q)echo $(usboot-init)
 	$(Q)echo $(usboot-main)

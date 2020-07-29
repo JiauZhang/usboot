@@ -1,1 +1,1 @@
-obj-y += lib.c
+obj-y += lib.o

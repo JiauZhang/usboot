@@ -1,1 +1,0 @@
-include $(srctree)/cpu/$(CPU)/Makefile

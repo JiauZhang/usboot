@@ -1,2 +1,2 @@
 # include $(srctree)/board/$(BOARD)/Makefile
-obj-y += $(BOARD)/board.c
+obj-y += $(BOARD)/board.o

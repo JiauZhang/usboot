@@ -1,1 +1,1 @@
-obj-y += main.c
+obj-y += main.o
