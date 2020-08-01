@@ -401,7 +401,8 @@ typedef struct
 #define  RCC_CSR_IWDGRSTF                    ((uint32_t)0x20000000)        /*!< Independent Watchdog reset flag */
 #define  RCC_CSR_WWDGRSTF                    ((uint32_t)0x40000000)        /*!< Window watchdog reset flag */
 #define  RCC_CSR_LPWRRSTF                    ((uint32_t)0x80000000)        /*!< Low-Power reset flag */
-
+#define  RCC_CFGR_PLLSRC_HSE				((uint32_t)0x00010000)		  /*!< HSE clock selected as PLL entry clock source */
+#define  RCC_CFGR_PLLMULL9					((uint32_t)0x001C0000)		  /*!< PLL input clock * 9 */
 
 /*******************  Bit definition for FLASH_ACR register  ******************/
 #define  FLASH_ACR_LATENCY                   ((uint8_t)0x03)               /*!< LATENCY[2:0] bits (Latency) */

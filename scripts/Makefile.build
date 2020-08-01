@@ -42,7 +42,7 @@ ifneq ($(strip $(lib-y) $(lib-)),)
 lib-target := $(obj)/lib.a
 endif
 
-ifneq ($(strip $(obj-y) $(obj-) $(lib-target)),)
+ifneq ($(strip $(obj-y) $(obj-) $(lib-target) $(extra-y)),)
 builtin-target := $(obj)/built-in.o
 endif
 
@@ -52,13 +52,17 @@ __build: $(builtin-target) $(lib-target) $(extra-y) $(subdir-y) $(always)
 # Rule to compile a set of .o files into one .o file
 ifdef builtin-target
 
-quiet_cmd_link_o_target = AR      $@
+quiet_cmd_link_o_target = 'LD        '$@
+# If the list of objects to link is empty, just create an empty built-in.o
+cmd_link_o_target = $(if $(strip $(obj-y)),\
+				$(LD) $(ld_flags) -r -o $@ $(filter $(obj-y), $^),\
+				rm -f $@; $(AR) rcs$(KBUILD_ARFLAGS) $@)
 
 $(builtin-target): $(obj-y)
-	@echo obj-y: $(obj-y)
 	$(Q)echo $(quiet_cmd_link_o_target)
 # $(Q)$(AR) rcs $@ $^
-	$(Q)$(LD) -r -o $@ $^
+# $(Q)$(LD) -r -o $@ $^
+	$(Q)$(cmd_link_o_target)
 
 endif # builtin-target
 
@@ -75,12 +79,12 @@ $(obj)/%.o: $(obj)/%.c
 	$(Q)$(CC) $(CFLAGS) $< -o $@
 
 $(obj)/%.o: $(obj)/%.S
-	$(Q)echo "CC        $@"
-	$(Q)$(CC) $(CFLAGS) $< -o $@
+	$(Q)echo "AS        $@"
+	$(Q)$(AS) $(CFLAGS) $< -o $@
 
 $(obj)/%.o: $(obj)/%.s
-	$(Q)echo "CC        $@"
-	$(Q)$(CC) $(CFLAGS) $< -o $@
+	$(Q)echo "AS        $@"
+	$(Q)$(AS) $(CFLAGS) $< -o $@
 
 PHONY += FORCE
 FORCE:

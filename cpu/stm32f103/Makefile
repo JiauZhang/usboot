@@ -1,1 +1,2 @@
-head-y := cpu/stm32f103/start.o
+head-y := start.o
+extra-y := $(head-y)
