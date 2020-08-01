@@ -1,1 +1,1 @@
-obj-y += lib.o
+obj-y += dummy.o

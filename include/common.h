@@ -3,6 +3,6 @@
 
 // defined in board/xxx/board.c
 void clock_init();
-void ram_init();
+void board_init();
 
 #endif

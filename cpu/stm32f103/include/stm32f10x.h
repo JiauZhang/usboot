@@ -1,7 +1,12 @@
 #ifndef __STM32F10x_H__
 #define __STM32F10x_H__
 
-#define __I     volatile const     /*!< defines 'read only' permissions      */
+#ifdef __cplusplus
+	#define __I     volatile                /*!< defines 'read only' permissions */
+#else
+	#define __I     volatile const          /*!< defines 'read only' permissions */ 
+#endif
+
 #define __O     volatile           /*!< defines 'write only' permissions     */
 #define __IO    volatile           /*!< defines 'read / write' permissions   */
 
@@ -35,8 +40,33 @@ typedef struct
 #endif /* STM32F10X_XL */ 
 } FLASH_TypeDef;
 
-typedef struct
-{
+#define FLASH_R_BASE        (AHBPERIPH_BASE + 0x2000) /*!< Flash registers base address */
+#define FLASH               ((FLASH_TypeDef *) FLASH_R_BASE)
+
+typedef enum { 
+	GPIO_Speed_10MHz = 1,
+	GPIO_Speed_2MHz, 
+	GPIO_Speed_50MHz
+} GPIOSpeed_TypeDef;
+
+typedef enum { 
+	GPIO_Mode_AIN = 0x0,
+	GPIO_Mode_IN_FLOATING = 0x04,
+	GPIO_Mode_IPD = 0x28,
+	GPIO_Mode_IPU = 0x48,
+	GPIO_Mode_Out_OD = 0x14,
+	GPIO_Mode_Out_PP = 0x10,
+	GPIO_Mode_AF_OD = 0x1C,
+	GPIO_Mode_AF_PP = 0x18
+} GPIOMode_TypeDef;
+
+typedef struct {
+	uint16_t GPIO_Pin;
+	GPIOSpeed_TypeDef GPIO_Speed;
+	GPIOMode_TypeDef GPIO_Mode;
+} GPIO_InitTypeDef;
+
+typedef struct {
   __IO uint32_t CRL;
   __IO uint32_t CRH;
   __IO uint32_t IDR;
@@ -46,13 +76,21 @@ typedef struct
   __IO uint32_t LCKR;
 } GPIO_TypeDef;
 
-typedef struct
-{
-  __IO uint32_t KR;
-  __IO uint32_t PR;
-  __IO uint32_t RLR;
-  __IO uint32_t SR;
-} IWDG_TypeDef;
+#define GPIOA_BASE            (APB2PERIPH_BASE + 0x0800)
+#define GPIOB_BASE            (APB2PERIPH_BASE + 0x0C00)
+#define GPIOC_BASE            (APB2PERIPH_BASE + 0x1000)
+#define GPIOD_BASE            (APB2PERIPH_BASE + 0x1400)
+#define GPIOE_BASE            (APB2PERIPH_BASE + 0x1800)
+#define GPIOF_BASE            (APB2PERIPH_BASE + 0x1C00)
+#define GPIOG_BASE            (APB2PERIPH_BASE + 0x2000)
+
+#define GPIOA               ((GPIO_TypeDef *) GPIOA_BASE)
+#define GPIOB               ((GPIO_TypeDef *) GPIOB_BASE)
+#define GPIOC               ((GPIO_TypeDef *) GPIOC_BASE)
+#define GPIOD               ((GPIO_TypeDef *) GPIOD_BASE)
+#define GPIOE               ((GPIO_TypeDef *) GPIOE_BASE)
+#define GPIOF               ((GPIO_TypeDef *) GPIOF_BASE)
+#define GPIOG               ((GPIO_TypeDef *) GPIOG_BASE)
 
 typedef struct
 {
@@ -78,6 +116,30 @@ typedef struct
 #endif /* STM32F10X_LD_VL || STM32F10X_MD_VL || STM32F10X_HD_VL */ 
 } RCC_TypeDef;
 
+#define CFGR_SWS_Mask             ((uint32_t)0x0000000C)
+#define CFGR_PLLMull_Mask         ((uint32_t)0x003C0000)
+#define CFGR_PLLSRC_Mask          ((uint32_t)0x00010000)
+#define CFGR_PLLXTPRE_Mask        ((uint32_t)0x00020000)
+#define CFGR_HPRE_Set_Mask        ((uint32_t)0x000000F0)
+#define CFGR_PPRE1_Set_Mask       ((uint32_t)0x00000700)
+#define CFGR_PPRE2_Set_Mask       ((uint32_t)0x00003800)
+#define CFGR_ADCPRE_Set_Mask      ((uint32_t)0x0000C000)
+#define CR2_STOP_CLEAR_Mask       ((uint16_t)0xCFFF)
+#define CR1_CLEAR_Mask            ((uint16_t)0xE9F3)  /*!< USART CR1 Mask */
+#define CR3_CLEAR_Mask            ((uint16_t)0xFCFF)  /*!< USART CR3 Mask */
+#define CR1_OVER8_Set             ((u16)0x8000)  /* USART OVER8 mode Enable Mask */
+
+typedef struct {
+	uint32_t SYSCLK_Frequency;
+	uint32_t HCLK_Frequency;
+	uint32_t PCLK1_Frequency;
+	uint32_t PCLK2_Frequency;
+	uint32_t ADCCLK_Frequency;
+} RCC_ClocksTypeDef;
+
+#define RCC_BASE            (AHBPERIPH_BASE + 0x1000)
+#define RCC                 ((RCC_TypeDef *) RCC_BASE)
+
 typedef struct
 {
   __IO uint32_t POWER;
@@ -102,24 +164,137 @@ typedef struct
   __IO uint32_t FIFO;
 } SDIO_TypeDef;
 
-typedef struct
-{
-  __IO uint16_t SR;
-  uint16_t  RESERVED0;
-  __IO uint16_t DR;
-  uint16_t  RESERVED1;
-  __IO uint16_t BRR;
-  uint16_t  RESERVED2;
-  __IO uint16_t CR1;
-  uint16_t  RESERVED3;
-  __IO uint16_t CR2;
-  uint16_t  RESERVED4;
-  __IO uint16_t CR3;
-  uint16_t  RESERVED5;
-  __IO uint16_t GTPR;
-  uint16_t  RESERVED6;
+#define SDIO_BASE           (PERIPH_BASE + 0x18000)
+#define SDIO                ((SDIO_TypeDef *) SDIO_BASE)
+
+typedef struct {
+	uint32_t USART_BaudRate;
+	uint16_t USART_WordLength;
+	uint16_t USART_StopBits;
+	uint16_t USART_Parity;
+	uint16_t USART_Mode;
+	uint16_t USART_HardwareFlowControl;
+} USART_InitTypeDef;
+
+#define USART_WordLength_8b                  ((uint16_t)0x0000)
+#define USART_WordLength_9b                  ((uint16_t)0x1000)
+#define USART_Parity_No                      ((uint16_t)0x0000)
+#define USART_Mode_Rx                        ((uint16_t)0x0004)
+#define USART_Mode_Tx                        ((uint16_t)0x0008)
+#define USART_StopBits_1                     ((uint16_t)0x0000)
+#define USART_HardwareFlowControl_None       ((uint16_t)0x0000)
+#define USART_IT_RXNE                        ((uint16_t)0x0525)
+#define USART_IT_TXE                         ((uint16_t)0x0727)
+#define IT_Mask                   ((uint16_t)0x001F)  /*!< USART Interrupt Mask */
+#define CR1_UE_Set                ((uint16_t)0x2000)  /*!< USART Enable Mask */
+#define CR1_UE_Reset              ((uint16_t)0xDFFF)  /*!< USART Disable Mask */
+
+typedef struct {
+	__IO uint16_t SR;
+	uint16_t  RESERVED0;
+	__IO uint16_t DR;
+	uint16_t  RESERVED1;
+	__IO uint16_t BRR;
+	uint16_t  RESERVED2;
+	__IO uint16_t CR1;
+	uint16_t  RESERVED3;
+	__IO uint16_t CR2;
+	uint16_t  RESERVED4;
+	__IO uint16_t CR3;
+	uint16_t  RESERVED5;
+	__IO uint16_t GTPR;
+	uint16_t  RESERVED6;
 } USART_TypeDef;
 
+#define RCC_APB2Periph_USART1          ((uint32_t)0x00004000)
+#define RCC_APB2Periph_AFIO            ((uint32_t)0x00000001)
+#define RCC_APB2Periph_GPIOA           ((uint32_t)0x00000004)
+
+#define USART1_CLK				 RCC_APB2Periph_USART1
+#define USART1_GPIO_CLK 		 RCC_APB2Periph_GPIOA
+
+#define USART1_BASE           (APB2PERIPH_BASE + 0x3800)
+#define USART2_BASE           (APB1PERIPH_BASE + 0x4400)
+#define USART3_BASE           (APB1PERIPH_BASE + 0x4800)
+#define UART4_BASE            (APB1PERIPH_BASE + 0x4C00)
+#define UART5_BASE            (APB1PERIPH_BASE + 0x5000)
+
+#define USART1              ((USART_TypeDef *) USART1_BASE)
+#define USART2              ((USART_TypeDef *) USART2_BASE)
+#define USART3              ((USART_TypeDef *) USART3_BASE)
+#define UART4               ((USART_TypeDef *) UART4_BASE)
+#define UART5               ((USART_TypeDef *) UART5_BASE)
+
+#define USART1_IRQn         37
+#define USART2_IRQn         38
+
+#define USART1_GPIO 			 GPIOA
+#define GPIO_Pin_9               ((uint16_t)0x0200)
+#define GPIO_Pin_10              ((uint16_t)0x0400)
+#define USART1_RxPin			 GPIO_Pin_10
+#define USART1_TxPin			 GPIO_Pin_9
+
+typedef struct
+{
+  __I  uint32_t CPUID;                        /*!< Offset: 0x00  CPU ID Base Register                                  */
+  __IO uint32_t ICSR;                         /*!< Offset: 0x04  Interrupt Control State Register                      */
+  __IO uint32_t VTOR;                         /*!< Offset: 0x08  Vector Table Offset Register                          */
+  __IO uint32_t AIRCR;                        /*!< Offset: 0x0C  Application Interrupt / Reset Control Register        */
+  __IO uint32_t SCR;                          /*!< Offset: 0x10  System Control Register                               */
+  __IO uint32_t CCR;                          /*!< Offset: 0x14  Configuration Control Register                        */
+  __IO uint8_t  SHP[12];                      /*!< Offset: 0x18  System Handlers Priority Registers (4-7, 8-11, 12-15) */
+  __IO uint32_t SHCSR;                        /*!< Offset: 0x24  System Handler Control and State Register             */
+  __IO uint32_t CFSR;                         /*!< Offset: 0x28  Configurable Fault Status Register                    */
+  __IO uint32_t HFSR;                         /*!< Offset: 0x2C  Hard Fault Status Register                            */
+  __IO uint32_t DFSR;                         /*!< Offset: 0x30  Debug Fault Status Register                           */
+  __IO uint32_t MMFAR;                        /*!< Offset: 0x34  Mem Manage Address Register                           */
+  __IO uint32_t BFAR;                         /*!< Offset: 0x38  Bus Fault Address Register                            */
+  __IO uint32_t AFSR;                         /*!< Offset: 0x3C  Auxiliary Fault Status Register                       */
+  __I  uint32_t PFR[2];                       /*!< Offset: 0x40  Processor Feature Register                            */
+  __I  uint32_t DFR;                          /*!< Offset: 0x48  Debug Feature Register                                */
+  __I  uint32_t ADR;                          /*!< Offset: 0x4C  Auxiliary Feature Register                            */
+  __I  uint32_t MMFR[4];                      /*!< Offset: 0x50  Memory Model Feature Register                         */
+  __I  uint32_t ISAR[5];                      /*!< Offset: 0x60  ISA Feature Register                                  */
+} SCB_Type; 
+
+#define SCS_BASE            (0xE000E000)               /*!< System Control Space Base Address */
+#define SCB_BASE            (SCS_BASE +  0x0D00)       /*!< System Control Block Base Address */
+#define SCB                 ((SCB_Type *)SCB_BASE)     /*!< SCB configuration struct*/
+
+typedef enum {
+	DISABLE = 0, 
+	ENABLE = !DISABLE
+} FunctionalState;
+
+typedef struct {
+  uint8_t NVIC_IRQChannel;
+  uint8_t NVIC_IRQChannelPreemptionPriority;
+  uint8_t NVIC_IRQChannelSubPriority;
+  FunctionalState NVIC_IRQChannelCmd;
+} NVIC_InitTypeDef;
+
+typedef struct {
+  __IO uint32_t ISER[8];
+       uint32_t RESERVED0[24];                                   
+  __IO uint32_t ICER[8];
+       uint32_t RSERVED1[24];                                    
+  __IO uint32_t ISPR[8];
+       uint32_t RESERVED2[24];                                   
+  __IO uint32_t ICPR[8];
+       uint32_t RESERVED3[24];                                   
+  __IO uint32_t IABR[8];
+       uint32_t RESERVED4[56];                                   
+  __IO uint8_t  IP[240];
+       uint32_t RESERVED5[644];                                  
+  __O  uint32_t STIR;
+}  NVIC_Type;
+
+#define NVIC_BASE                    (SCS_BASE +  0x0100)
+#define NVIC                         ((NVIC_Type *)NVIC_BASE)
+#define AIRCR_VECTKEY_MASK           ((uint32_t)0x05FA0000)
+#define NVIC_PriorityGroup_0         ((uint32_t)0x700)
+
+#define VECT_TAB_OFFSET  0x0
 #define FLASH_BASE            ((uint32_t)0x08000000) /*!< FLASH base address in the alias region */
 #define SRAM_BASE             ((uint32_t)0x20000000) /*!< SRAM base address in the alias region */
 #define PERIPH_BASE           ((uint32_t)0x40000000) /*!< Peripheral base address in the alias region */
@@ -131,91 +306,6 @@ typedef struct
 #define APB1PERIPH_BASE       PERIPH_BASE
 #define APB2PERIPH_BASE       (PERIPH_BASE + 0x10000)
 #define AHBPERIPH_BASE        (PERIPH_BASE + 0x20000)
-#define TIM2_BASE             (APB1PERIPH_BASE + 0x0000)
-#define TIM3_BASE             (APB1PERIPH_BASE + 0x0400)
-#define TIM4_BASE             (APB1PERIPH_BASE + 0x0800)
-#define TIM5_BASE             (APB1PERIPH_BASE + 0x0C00)
-#define TIM6_BASE             (APB1PERIPH_BASE + 0x1000)
-#define TIM7_BASE             (APB1PERIPH_BASE + 0x1400)
-#define TIM12_BASE            (APB1PERIPH_BASE + 0x1800)
-#define TIM13_BASE            (APB1PERIPH_BASE + 0x1C00)
-#define TIM14_BASE            (APB1PERIPH_BASE + 0x2000)
-#define RTC_BASE              (APB1PERIPH_BASE + 0x2800)
-#define WWDG_BASE             (APB1PERIPH_BASE + 0x2C00)
-#define IWDG_BASE             (APB1PERIPH_BASE + 0x3000)
-#define SPI2_BASE             (APB1PERIPH_BASE + 0x3800)
-#define SPI3_BASE             (APB1PERIPH_BASE + 0x3C00)
-#define USART2_BASE           (APB1PERIPH_BASE + 0x4400)
-#define USART3_BASE           (APB1PERIPH_BASE + 0x4800)
-#define UART4_BASE            (APB1PERIPH_BASE + 0x4C00)
-#define UART5_BASE            (APB1PERIPH_BASE + 0x5000)
-#define I2C1_BASE             (APB1PERIPH_BASE + 0x5400)
-#define I2C2_BASE             (APB1PERIPH_BASE + 0x5800)
-#define CAN1_BASE             (APB1PERIPH_BASE + 0x6400)
-#define CAN2_BASE             (APB1PERIPH_BASE + 0x6800)
-#define BKP_BASE              (APB1PERIPH_BASE + 0x6C00)
-#define PWR_BASE              (APB1PERIPH_BASE + 0x7000)
-#define DAC_BASE              (APB1PERIPH_BASE + 0x7400)
-#define CEC_BASE              (APB1PERIPH_BASE + 0x7800)
-#define AFIO_BASE             (APB2PERIPH_BASE + 0x0000)
-#define EXTI_BASE             (APB2PERIPH_BASE + 0x0400)
-#define GPIOA_BASE            (APB2PERIPH_BASE + 0x0800)
-#define GPIOB_BASE            (APB2PERIPH_BASE + 0x0C00)
-#define GPIOC_BASE            (APB2PERIPH_BASE + 0x1000)
-#define GPIOD_BASE            (APB2PERIPH_BASE + 0x1400)
-#define GPIOE_BASE            (APB2PERIPH_BASE + 0x1800)
-#define GPIOF_BASE            (APB2PERIPH_BASE + 0x1C00)
-#define GPIOG_BASE            (APB2PERIPH_BASE + 0x2000)
-#define ADC1_BASE             (APB2PERIPH_BASE + 0x2400)
-#define ADC2_BASE             (APB2PERIPH_BASE + 0x2800)
-#define TIM1_BASE             (APB2PERIPH_BASE + 0x2C00)
-#define SPI1_BASE             (APB2PERIPH_BASE + 0x3000)
-#define TIM8_BASE             (APB2PERIPH_BASE + 0x3400)
-#define USART1_BASE           (APB2PERIPH_BASE + 0x3800)
-#define ADC3_BASE             (APB2PERIPH_BASE + 0x3C00)
-#define TIM15_BASE            (APB2PERIPH_BASE + 0x4000)
-#define TIM16_BASE            (APB2PERIPH_BASE + 0x4400)
-#define TIM17_BASE            (APB2PERIPH_BASE + 0x4800)
-#define TIM9_BASE             (APB2PERIPH_BASE + 0x4C00)
-#define TIM10_BASE            (APB2PERIPH_BASE + 0x5000)
-#define TIM11_BASE            (APB2PERIPH_BASE + 0x5400)
-#define SDIO_BASE             (PERIPH_BASE + 0x18000)
-#define DMA1_BASE             (AHBPERIPH_BASE + 0x0000)
-#define DMA1_Channel1_BASE    (AHBPERIPH_BASE + 0x0008)
-#define DMA1_Channel2_BASE    (AHBPERIPH_BASE + 0x001C)
-#define DMA1_Channel3_BASE    (AHBPERIPH_BASE + 0x0030)
-#define DMA1_Channel4_BASE    (AHBPERIPH_BASE + 0x0044)
-#define DMA1_Channel5_BASE    (AHBPERIPH_BASE + 0x0058)
-#define DMA1_Channel6_BASE    (AHBPERIPH_BASE + 0x006C)
-#define DMA1_Channel7_BASE    (AHBPERIPH_BASE + 0x0080)
-#define DMA2_BASE             (AHBPERIPH_BASE + 0x0400)
-#define DMA2_Channel1_BASE    (AHBPERIPH_BASE + 0x0408)
-#define DMA2_Channel2_BASE    (AHBPERIPH_BASE + 0x041C)
-#define DMA2_Channel3_BASE    (AHBPERIPH_BASE + 0x0430)
-#define DMA2_Channel4_BASE    (AHBPERIPH_BASE + 0x0444)
-#define DMA2_Channel5_BASE    (AHBPERIPH_BASE + 0x0458)
-#define RCC_BASE              (AHBPERIPH_BASE + 0x1000)
-#define CRC_BASE              (AHBPERIPH_BASE + 0x3000)
-#define FLASH_R_BASE          (AHBPERIPH_BASE + 0x2000) /*!< Flash registers base address */
-#define OB_BASE               ((uint32_t)0x1FFFF800)    /*!< Flash Option Bytes base address */
-#define DBGMCU_BASE          ((uint32_t)0xE0042000) /*!< Debug MCU registers base address */
-
-#define RTC                 ((RTC_TypeDef *) RTC_BASE)
-#define USART2              ((USART_TypeDef *) USART2_BASE)
-#define USART3              ((USART_TypeDef *) USART3_BASE)
-#define UART4               ((USART_TypeDef *) UART4_BASE)
-#define UART5               ((USART_TypeDef *) UART5_BASE)
-#define GPIOA               ((GPIO_TypeDef *) GPIOA_BASE)
-#define GPIOB               ((GPIO_TypeDef *) GPIOB_BASE)
-#define GPIOC               ((GPIO_TypeDef *) GPIOC_BASE)
-#define GPIOD               ((GPIO_TypeDef *) GPIOD_BASE)
-#define GPIOE               ((GPIO_TypeDef *) GPIOE_BASE)
-#define GPIOF               ((GPIO_TypeDef *) GPIOF_BASE)
-#define GPIOG               ((GPIO_TypeDef *) GPIOG_BASE)
-#define USART1              ((USART_TypeDef *) USART1_BASE)
-#define SDIO                ((SDIO_TypeDef *) SDIO_BASE)
-#define RCC                 ((RCC_TypeDef *) RCC_BASE)
-#define FLASH               ((FLASH_TypeDef *) FLASH_R_BASE)
 
 /********************  Bit definition for RCC_CR register  ********************/
 #define  RCC_CR_HSION                        ((uint32_t)0x00000001)        /*!< Internal High Speed clock enable */
@@ -344,12 +434,6 @@ typedef struct
 #define  RCC_APB2RSTR_TIM1RST                ((uint32_t)0x00000800)        /*!< TIM1 Timer reset */
 #define  RCC_APB2RSTR_SPI1RST                ((uint32_t)0x00001000)        /*!< SPI 1 reset */
 #define  RCC_APB2RSTR_USART1RST              ((uint32_t)0x00004000)        /*!< USART1 reset */
-
-#if defined (STM32F10X_LD_VL) || defined (STM32F10X_MD_VL) || defined (STM32F10X_HD_VL)
-#define  RCC_APB2RSTR_TIM15RST               ((uint32_t)0x00010000)        /*!< TIM15 Timer reset */
-#define  RCC_APB2RSTR_TIM16RST               ((uint32_t)0x00020000)        /*!< TIM16 Timer reset */
-#define  RCC_APB2RSTR_TIM17RST               ((uint32_t)0x00040000)        /*!< TIM17 Timer reset */
-#endif
 
 /*****************  Bit definition for RCC_APB1RSTR register  *****************/
 #define  RCC_APB1RSTR_TIM2RST                ((uint32_t)0x00000001)        /*!< Timer 2 reset */

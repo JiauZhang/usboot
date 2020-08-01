@@ -7,6 +7,12 @@ EXTRAVERSION =
 # Do not print "Entering directory ..."
 MAKEFLAGS += -rR --no-print-directory
 
+# Avoid funny character set dependencies
+unexport LC_ALL
+LC_COLLATE=C
+LC_NUMERIC=C
+export LC_COLLATE LC_NUMERIC
+
 # Use 'make V=1' to see the full commands
 ifeq ("$(origin V)", "command line")
 	BUILD_VERBOSE = $(V)
@@ -56,10 +62,11 @@ AS = $(CROSS_COMPILE)as
 CC = $(CROSS_COMPILE)gcc
 LD = $(CROSS_COMPILE)ld
 AR = $(CROSS_COMPILE)ar
+NM = $(CROSS_COMPILE)nm
 OBJCOPY = $(CROSS_COMPILE)objcopy
 OBJDUMP = $(CROSS_COMPILE)objdump
 
-export AS CC LD AR OBJCOPY OBJDUMP
+export AS CC LD AR NM OBJCOPY OBJDUMP
 
 LDSCRIPT = $(srctree)/cpu/$(CPU)/usboot.lds
 CFLAGS = -c -I$(srctree)/include -I$(srctree)/cpu/$(CPU)/include
@@ -94,6 +101,7 @@ usboot-all := $(usboot-init) $(usboot-main)
 usboot-lds := cpu/$(CPU)/usboot.lds
 
 usboot: $(usboot-lds) $(usboot-init) $(usboot-main)
+	$(Q)echo 'LD        $@'
 	$(Q)$(LD) -o $@ $^ -T $(LDSCRIPT)
 	@echo "\033[31mUSBOOT:\033[0m $@ is ready"
 
@@ -113,6 +121,15 @@ usboot.bin: usboot
 usboot.dis: usboot
 	$(Q)echo "OBJDUMP   $@"
 	$(Q)$(OBJDUMP) -D -m arm $< > $@
+	@echo "\033[31mUSBOOT:\033[0m $@ is ready"
+
+SYSTEM_MAP = \
+		$(NM) $1 | \
+		grep -v '\(compiled\)\|\(\.o$$\)\|\( [aUw] \)\|\(\.\.ng$$\)\|\(LASH[RL]DI\)' | \
+		LC_ALL=C sort
+System.map:	usboot
+	$(Q)echo "SYSMAP    $@"
+	@$(call SYSTEM_MAP,$<) > $@
 	@echo "\033[31mUSBOOT:\033[0m $@ is ready"
 
 clean:

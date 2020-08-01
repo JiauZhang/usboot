@@ -16,8 +16,8 @@ void _flash_irq()
 int main(void)
 {
 	clock_init();
-	ram_init();
 	bss_test = _bss_start;
+	board_init();
 
 	return 0;
 }
