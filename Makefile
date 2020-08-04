@@ -1,7 +1,7 @@
 VERSION = 0
 PATCHLEVEL = 0
 SUBLEVEL = 1
-EXTRAVERSION =
+EXTRAVERSION = -rc1
 
 # Do not use make's built-in rules and variables
 # Do not print "Entering directory ..."

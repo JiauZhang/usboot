@@ -307,6 +307,27 @@ void RCC_GetClocksFreq(RCC_ClocksTypeDef* RCC_Clocks)
   RCC_Clocks->ADCCLK_Frequency = RCC_Clocks->PCLK2_Frequency / presc;
 }
 
+#define countof(a)   (sizeof(a) / sizeof(*(a)))
+
+#define TxBufferSize1   (countof(TxBuffer1) - 1)
+#define TxBufferSize2   (countof(TxBuffer2) - 1)
+#define RxBufferSize1   TxBufferSize2
+#define RxBufferSize2   TxBufferSize1
+
+uint8_t TxBuffer1[] = "USART Interrupt Example: USARTy -> USARTz using Interrupt";
+uint8_t TxBuffer2[] = "USART Interrupt Example: USARTz -> USARTy using Interrupt";
+uint8_t RxBuffer1[RxBufferSize1];
+uint8_t RxBuffer2[RxBufferSize2];
+__IO uint8_t TxCounter1 = 0x00;
+__IO uint8_t TxCounter2 = 0x00;
+__IO uint8_t RxCounter1 = 0x00; 
+__IO uint8_t RxCounter2 = 0x00;
+uint8_t NbrOfDataToTransfer1 = TxBufferSize1;
+uint8_t NbrOfDataToTransfer2 = TxBufferSize2;
+
+uint8_t NbrOfDataToRead1 = RxBufferSize1;
+uint8_t NbrOfDataToRead2 = RxBufferSize2;
+
 void USART_Init(USART_TypeDef* USARTx, USART_InitTypeDef* USART_InitStruct)
 {
   uint32_t tmpreg = 0x00, apbclock = 0x00;
@@ -423,6 +444,45 @@ void USART_ITConfig(USART_TypeDef* USARTx, uint16_t USART_IT, FunctionalState Ne
   }
 }
 
+ITStatus USART_GetITStatus(USART_TypeDef* USARTx, uint16_t USART_IT)
+{
+  uint32_t bitpos = 0x00, itmask = 0x00, usartreg = 0x00;
+  ITStatus bitstatus = RESET;  
+  
+  /* Get the USART register index */
+  usartreg = (((uint8_t)USART_IT) >> 0x05);
+  /* Get the interrupt position */
+  itmask = USART_IT & IT_Mask;
+  itmask = (uint32_t)0x01 << itmask;
+  
+  if (usartreg == 0x01) /* The IT  is in CR1 register */
+  {
+    itmask &= USARTx->CR1;
+  }
+  else if (usartreg == 0x02) /* The IT  is in CR2 register */
+  {
+    itmask &= USARTx->CR2;
+  }
+  else /* The IT  is in CR3 register */
+  {
+    itmask &= USARTx->CR3;
+  }
+  
+  bitpos = USART_IT >> 0x08;
+  bitpos = (uint32_t)0x01 << bitpos;
+  bitpos &= USARTx->SR;
+  if ((itmask != (uint16_t)RESET)&&(bitpos != (uint16_t)RESET))
+  {
+    bitstatus = SET;
+  }
+  else
+  {
+    bitstatus = RESET;
+  }
+  
+  return bitstatus;  
+}
+
 void uart1_init()
 {
 	/* Enable GPIO clock */
@@ -469,7 +529,46 @@ void uart1_init()
 
 	/* Enable the USART1 */
 	USART1->CR1 |= CR1_UE_Set;
+
+	/* loop sending data */
+	while (1) {
+		if(USART_GetITStatus(USART1, USART_IT_TXE) != RESET)
+		{   
+		/* Write one byte to the transmit data register */
+			USART1->DR = (TxBuffer1[TxCounter1++] & (uint16_t)0x01FF);
+		}
+
+		if (TxCounter1 >= TxBufferSize1)
+			TxCounter1 = 0;
+	}
 	
+}
+
+void _usart1_irq(void)
+{
+  if(USART_GetITStatus(USART1, USART_IT_RXNE) != RESET)
+  {
+    /* Read one byte from the receive data register */
+    RxBuffer1[RxCounter1++] = (uint16_t)(USART1->DR & (uint16_t)0x01FF);
+
+    if(RxCounter1 == NbrOfDataToRead1)
+    {
+      /* Disable the USARTy Receive interrupt */
+      USART_ITConfig(USART1, USART_IT_RXNE, DISABLE);
+    }
+  }
+  
+  if(USART_GetITStatus(USART1, USART_IT_TXE) != RESET)
+  {   
+    /* Write one byte to the transmit data register */
+	USART1->DR = (TxBuffer1[TxCounter1++] & (uint16_t)0x01FF);
+
+    if(TxCounter1 == NbrOfDataToTransfer1)
+    {
+      /* Disable the USARTy Transmit interrupt */
+      USART_ITConfig(USART1, USART_IT_TXE, DISABLE);
+    }    
+  }
 }
 
 void board_init()

@@ -18,6 +18,8 @@ int main(void)
 	clock_init();
 	bss_test = _bss_start;
 	board_init();
+	
+	while (1) {;}
 
 	return 0;
 }
