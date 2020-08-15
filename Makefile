@@ -52,7 +52,7 @@ src-y :=
 # obj-y = $(srctree)/cpu/stm32f103/start.o init/main.o
 # obj-y += $(srctree)/board/bluepill/board.o
 
-CPU = stm32f103
+CPU = cortex-m3
 BOARD = bluepill
 CROSS_COMPILE = arm-none-eabi-
 
@@ -68,11 +68,17 @@ OBJDUMP = $(CROSS_COMPILE)objdump
 
 export AS CC LD AR NM OBJCOPY OBJDUMP
 
-LDSCRIPT = $(srctree)/cpu/$(CPU)/usboot.lds
-CFLAGS = -c -I$(srctree)/include -I$(srctree)/cpu/$(CPU)/include
+LDSCRIPT = $(srctree)/arch/arm/$(CPU)/usboot.lds
+
+LIBC_ := $(shell $(CC) -print-file-name=libc.a)
+LIBSDIR := $(dir $(LIBC_))
+# LDFLAGS := -L$(LIBSDIR) -lc -lm -lnosys
+
+CFLAGS = -c -I$(srctree)/include -I$(srctree)/cpu/$(CPU)/include \
+	-mthumb -mcpu=cortex-m3
 OBJCOPYFLAGS = -O binary -R .comment -S
 
-export CFLAGS OBJCOPYFLAGS
+export LDFLAGS CFLAGS OBJCOPYFLAGS
 
 # Some generic definitions
 include $(srctree)/scripts/Makefile.include
@@ -87,7 +93,7 @@ libs-y := lib/
 # include cpu specific dir
 # include cpu/$(CPU)/Makefile
 # It must be include after core-y
-include cpu/Makefile
+include arch/arm/Makefile
 
 usboot-dirs	:= $(patsubst %/,%,$(filter %/, $(init-y) $(core-y) $(libs-y)))
 
@@ -98,11 +104,12 @@ libs-y := $(patsubst %/, %/built-in.o, $(libs-y))
 usboot-init := $(head-y) $(init-y)
 usboot-main := $(core-y) $(libs-y)
 usboot-all := $(usboot-init) $(usboot-main)
-usboot-lds := cpu/$(CPU)/usboot.lds
+usboot-lds := $(LDSCRIPT)
 
 usboot: $(usboot-lds) $(usboot-init) $(usboot-main)
 	$(Q)echo 'LD        $@'
-	$(Q)$(LD) -o $@ $^ -T $(LDSCRIPT)
+	$(Q)$(LD) -o $@ -T $(LDSCRIPT) $(LDFLAGS) \
+	$(usboot-init) --start-group $(usboot-main) --end-group
 	@echo "\033[31mUSBOOT:\033[0m $@ is ready"
 
 # The actual objects are generated when descending, 

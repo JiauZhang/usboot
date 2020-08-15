@@ -30,5 +30,6 @@ subdir-obj-y := $(addprefix $(obj)/,$(subdir-obj-y))
 real-objs-y := $(addprefix $(obj)/,$(real-objs-y))
 multi-used := $(addprefix $(obj)/,$(multi-used))
 multi-objs := $(addprefix $(obj)/,$(multi-objs))
+subdir-y := $(addprefix $(obj)/,$(subdir-y))
 obj-dirs := $(addprefix $(obj)/,$(obj-dirs))
 

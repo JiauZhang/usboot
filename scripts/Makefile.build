@@ -69,6 +69,9 @@ endif # builtin-target
 $(lib-target): $(lib-y)
 	@echo 'lib-y: '$(lib-y)
 
+# To build objects in subdirs, we need to descend into the directories
+$(sort $(subdir-obj-y)): $(subdir-y) ;
+
 # Descending into subdirectories
 PHONY += $(subdir-y)
 $(subdir-y):

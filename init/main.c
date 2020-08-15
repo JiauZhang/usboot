@@ -1,25 +1,14 @@
-/*
- * usboot/init/main.c
- */
+// SPDX-License-Identifier: BSD-3-Clause
 
 #include <common.h>
 
-int bss_test;
-extern unsigned int _bss_start;
-
-void _flash_irq()
-{
-	int i;
-	for (i=0; i<10; i++);
-}
-
 int main(void)
 {
-	clock_init();
-	bss_test = _bss_start;
-	board_init();
-	
-	while (1) {;}
+	unsigned char str[] = "test uart...\n";
 
-	return 0;
+	while (1)
+	{
+		printk(str);
+		delay(1000);
+	}
 }
