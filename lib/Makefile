@@ -1,1 +1,1 @@
-obj-y += string.o
+lib-y += string.o

@@ -45,18 +45,12 @@ export srctree objtree
 # Look for make include files relative to root of usboot src
 MAKEFLAGS += --include-dir=$(srctree)
 
-# src-y = $(srctree)/cpu/stm32f103/start.S init/main.c
-# src-y += $(srctree)/board/bluepill/board.c
-src-y :=
-
-# obj-y = $(srctree)/cpu/stm32f103/start.o init/main.o
-# obj-y += $(srctree)/board/bluepill/board.o
-
+ARCH = arm
 CPU = cortex-m3
 BOARD = bluepill
 CROSS_COMPILE = arm-none-eabi-
 
-export CPU BOARD
+export ARCH CPU BOARD
 
 AS = $(CROSS_COMPILE)as
 CC = $(CROSS_COMPILE)gcc
@@ -68,7 +62,7 @@ OBJDUMP = $(CROSS_COMPILE)objdump
 
 export AS CC LD AR NM OBJCOPY OBJDUMP
 
-LDSCRIPT = $(srctree)/arch/arm/$(CPU)/usboot.lds
+LDSCRIPT = $(srctree)/arch/$(ARCH)/$(CPU)/usboot.lds
 
 LIBC_ := $(shell $(CC) -print-file-name=libc.a)
 LIBSDIR := $(dir $(LIBC_))
@@ -90,16 +84,16 @@ init-y := init/
 core-y := board/
 libs-y := lib/
 
-# include cpu specific dir
-# include cpu/$(CPU)/Makefile
 # It must be include after core-y
-include arch/arm/Makefile
+include arch/$(ARCH)/Makefile
 
 usboot-dirs	:= $(patsubst %/,%,$(filter %/, $(init-y) $(core-y) $(libs-y)))
 
-init-y := $(patsubst %/, %/built-in.o, $(init-y))
-core-y := $(patsubst %/, %/built-in.o, $(core-y))
-libs-y := $(patsubst %/, %/built-in.o, $(libs-y))
+init-y  := $(patsubst %/, %/built-in.o, $(init-y))
+core-y  := $(patsubst %/, %/built-in.o, $(core-y))
+libs-y1 := $(patsubst %/, %/lib.a, $(libs-y))
+libs-y2 := $(patsubst %/, %/built-in.o, $(libs-y))
+libs-y  := $(libs-y1) $(libs-y2)
 
 usboot-init := $(head-y) $(init-y)
 usboot-main := $(core-y) $(libs-y)
@@ -108,7 +102,7 @@ usboot-lds := $(LDSCRIPT)
 
 usboot: $(usboot-lds) $(usboot-init) $(usboot-main)
 	$(Q)echo 'LD        $@'
-	$(Q)$(LD) -o $@ -T $(LDSCRIPT) $(LDFLAGS) \
+	$(Q)$(LD) -o $@ -T $(LDSCRIPT) $(LDFLAGS) -L arch/arm/lib/libopencm3/lib -lopencm3_stm32f1 \
 	$(usboot-init) --start-group $(usboot-main) --end-group
 	@echo "\033[31mUSBOOT:\033[0m $@ is ready"
 

@@ -66,8 +66,16 @@ $(builtin-target): $(obj-y)
 
 endif # builtin-target
 
+ifdef lib-target
+
+quiet_cmd_link_l_target = 'AR        '$@
+cmd_link_l_target = rm -f $@; $(AR) rcs$(KBUILD_ARFLAGS) $@ $(lib-y)
+
 $(lib-target): $(lib-y)
-	@echo 'lib-y: '$(lib-y)
+	$(Q)echo $(quiet_cmd_link_l_target)
+	$(Q)$(cmd_link_l_target)
+
+endif # lib-target
 
 # To build objects in subdirs, we need to descend into the directories
 $(sort $(subdir-obj-y)): $(subdir-y) ;
@@ -88,6 +96,11 @@ $(obj)/%.o: $(obj)/%.S
 $(obj)/%.o: $(obj)/%.s
 	$(Q)echo "AS        $@"
 	$(Q)$(AS) $(CFLAGS) $< -o $@
+
+ifeq ($(CPU),cortex-m3)
+$(obj)/libopencm3/lib/libopencm3_stm32f1.a:
+	$(Q)$(MAKE) -C $(obj)/libopencm3 TARGETS=stm32/f1 RM='rm -f'
+endif
 
 PHONY += FORCE
 FORCE:
