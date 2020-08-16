@@ -66,10 +66,19 @@ LDSCRIPT = $(srctree)/arch/$(ARCH)/$(CPU)/usboot.lds
 
 LIBC_ := $(shell $(CC) -print-file-name=libc.a)
 LIBSDIR := $(dir $(LIBC_))
-# LDFLAGS := -L$(LIBSDIR) -lc -lm -lnosys
+LDFLAGS := 
+LIBS := 
 
 CFLAGS = -c -I$(srctree)/include -I$(srctree)/cpu/$(CPU)/include \
 	-mthumb -mcpu=cortex-m3
+
+ifeq ($(CPU),cortex-m3)
+  CFLAGS += -I$(srctree)/arch/arm/lib/libopencm3/include
+  CFLAGS += -DSTM32F1
+  LDFLAGS += -L arch/arm/lib/libopencm3/lib
+  LIBS += -lopencm3_stm32f1
+endif
+
 OBJCOPYFLAGS = -O binary -R .comment -S
 
 export LDFLAGS CFLAGS OBJCOPYFLAGS
@@ -102,8 +111,8 @@ usboot-lds := $(LDSCRIPT)
 
 usboot: $(usboot-lds) $(usboot-init) $(usboot-main)
 	$(Q)echo 'LD        $@'
-	$(Q)$(LD) -o $@ -T $(LDSCRIPT) $(LDFLAGS) -L arch/arm/lib/libopencm3/lib -lopencm3_stm32f1 \
-	$(usboot-init) --start-group $(usboot-main) --end-group
+	$(Q)$(LD) -o $@ -T $(LDSCRIPT) $(LDFLAGS) \
+	$(usboot-init) --start-group $(usboot-main) $(LIBS) --end-group
 	@echo "\033[31mUSBOOT:\033[0m $@ is ready"
 
 # The actual objects are generated when descending, 

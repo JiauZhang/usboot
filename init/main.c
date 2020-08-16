@@ -6,9 +6,7 @@ int main(void)
 {
 	unsigned char str[] = "test uart...\n";
 
-	while (1)
-	{
-		printk(str);
-		delay(1000);
-	}
+	board_init();
+
+	return 0;
 }
